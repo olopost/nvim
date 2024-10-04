@@ -38,6 +38,7 @@ require("lazy").setup({
 	"ahmedkhalf/project.nvim", -- project management
 	"nvim-treesitter/playground", -- plugins de playground pour treesitter
 	"dhruvasagar/vim-table-mode", -- markdown table mode
+	"olopost/auto-header.nvim",
 	{
 		"olopost/render-markdown.nvim",
 		branch = "feat-mark",
@@ -144,7 +145,26 @@ require("lazy").setup({
 			--  - Normal mode: ?
 			--
 			--
+			-- Auto Header
+			--
+			require("auto-header").setup({
+				create = true,
+				update = true,
+				languages = { "python", "go", "bash", "markdown" },
+				templates = {
+					{
+						language = "*",
+						template = {
+							"File: #file_relative_path",
+							"Author: #author_name",
+							"Last modifier: #date_now",
+							"Modified By: #author_name",
+						},
+					},
+				},
+			})
 			-- Treesitter
+			--
 			--
 			require("nvim-treesitter.configs").setup({
 				ensure_installed = { "markdown", "html" },
@@ -806,55 +826,55 @@ require("lazy").setup({
 --
 --
 --
-local query = vim.treesitter.query.parse("html", "@mark")
-local function parse_mark(root, buf)
-	local marks = {}
-end
-require("render-markdown").setup({
-	custom_handlers = {
-		markdown = {
-			extends = true,
-			parse = function(root, buf)
-				local marks = {}
-
-				---@param row integer
-				---@param start_col integer
-				---@param end_col integer
-				---@param conceal? string
-				---@param hl_group? string
-				local function append(row, start_col, end_col, conceal, hl_group)
-					table.insert(marks, {
-						conceal = true,
-						start_row = row,
-						start_col = start_col,
-						opts = { end_row = row, end_col = end_col, conceal = conceal, hl_group = hl_group },
-					})
-				end
-
-				local start_row = root:range()
-				local text = vim.treesitter.get_node_text(root, buf)
-				for i, line in ipairs(vim.split(text, "\n", { plain = true })) do
-					local row = start_row + i - 1
-					---@type integer|nil
-					local position = 1
-					while position ~= nil do
-						local start_col, end_col = line:find("(=)=[^=]+=(=)", position)
-						if start_col ~= nil and end_col ~= nil then
-							-- Translate 1 based index to 0 based index, update position
-							start_col, position = start_col - 1, end_col + 1
-							-- Hide first 2 equal signs
-							append(row, start_col, start_col + 2, "", nil)
-							-- Highlight contents
-							append(row, start_col, end_col, nil, "DiffDelete")
-							-- Hide last 2 equal signs
-							append(row, end_col - 2, end_col, "", nil)
-						else
-							position = nil
-						end
-					end
-				end
-				return marks
-			end,
-		},
-	},
-})
+-- local query = vim.treesitter.query.parse("html", "@mark")
+-- local function parse_mark(root, buf)
+-- 	local marks = {}
+-- end
+-- require("render-markdown").setup({
+-- 	custom_handlers = {
+-- 		markdown = {
+-- 			extends = true,
+-- 			parse = function(root, buf)
+-- 				local marks = {}
+--
+-- 				---@param row integer
+-- 				---@param start_col integer
+-- 				---@param end_col integer
+-- 				---@param conceal? string
+-- 				---@param hl_group? string
+-- 				local function append(row, start_col, end_col, conceal, hl_group)
+-- 					table.insert(marks, {
+-- 						conceal = true,
+-- 						start_row = row,
+-- 						start_col = start_col,
+-- 						opts = { end_row = row, end_col = end_col, conceal = conceal, hl_group = hl_group },
+-- 					})
+-- 				end
+--
+-- 				local start_row = root:range()
+-- 				local text = vim.treesitter.get_node_text(root, buf)
+-- 				for i, line in ipairs(vim.split(text, "\n", { plain = true })) do
+-- 					local row = start_row + i - 1
+-- 					---@type integer|nil
+-- 					local position = 1
+-- 					while position ~= nil do
+-- 						local start_col, end_col = line:find("(=)=[^=]+=(=)", position)
+-- 						if start_col ~= nil and end_col ~= nil then
+-- 							-- Translate 1 based index to 0 based index, update position
+-- 							start_col, position = start_col - 1, end_col + 1
+-- 							-- Hide first 2 equal signs
+-- 							append(row, start_col, start_col + 2, "", nil)
+-- 							-- Highlight contents
+-- 							append(row, start_col, end_col, nil, "DiffDelete")
+-- 							-- Hide last 2 equal signs
+-- 							append(row, end_col - 2, end_col, "", nil)
+-- 						else
+-- 							position = nil
+-- 						end
+-- 					end
+-- 				end
+-- 				return marks
+-- 			end,
+-- 		},
+-- 	},
+-- })
