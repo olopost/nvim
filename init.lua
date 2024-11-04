@@ -1,4 +1,10 @@
--- Set space as leader ke
+--[[
+-- Samuel MEYNARD
+-- Created on September 21th, 2024
+--]]
+--
+
+-- Set space as leader key
 --
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
@@ -11,6 +17,12 @@ vim.api.nvim_set_keymap("!", "<D-v>", "<C-R>+", { noremap = true, silent = true 
 vim.api.nvim_set_keymap("t", "<D-v>", "<C-R>+", { noremap = true, silent = true })
 vim.api.nvim_set_keymap("v", "<D-v>", "<C-R>+", { noremap = true, silent = true })
 
+-- tab
+--
+vim.opt.tabstop = 2
+vim.opt.shiftwidth = 2
+vim.opt.expandtab = true
+
 -- nerdfont installed
 vim.g.have_nerd_font = true
 
@@ -19,6 +31,24 @@ vim.opt.number = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.opt.mouse = "a"
+
+-- load .env
+--
+local function load_env()
+	local env_file = os.getenv("HOME") .. "/.env"
+	local f = io.open(env_file, "r")
+	if f then
+		for line in f:lines() do
+			local key, value = line:match("^(%S+)=(%S+)$")
+			if key and value then
+				vim.env[key] = value
+			end
+		end
+	end
+end
+
+vim.env["USERNAME"] = "Samuel MEYNARD"
+load_env()
 
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
@@ -47,6 +77,14 @@ require("lazy").setup({
 		dependencies = { "nvim-treesitter/nvim-treesitter", "echasnovski/mini.nvim" }, -- if you use the mini.nvim suite
 		-- dependencies = { 'nvim-treesitter/nvim-treesitter', 'echasnovski/mini.icons' }, -- if you use standalone mini plugins
 		-- dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-tree/nvim-web-devicons' }, -- if you prefer nvim-web-devicons
+	},
+	{
+		"folke/tokyonight.nvim",
+		lazy = false, -- Charger immédiatement
+		priority = 1000, -- S'assurer qu'il est chargé avant les autres plugins
+		config = function()
+			vim.cmd("colorscheme tokyonight-storm")
+		end,
 	},
 	{
 		"folke/which-key.nvim",
@@ -207,6 +245,7 @@ require("lazy").setup({
 
 			-- See `:help telescope.builtin`
 			local builtin = require("telescope.builtin")
+			vim.api.nvim_set_keymap("n", "<leader>bb", ":Telescope buffers<CR>", { noremap = true, silent = true })
 			vim.api.nvim_set_keymap("n", "<leader>ff", ":Telescope find_files<CR>", { noremap = true, silent = true })
 			vim.api.nvim_set_keymap("n", "<leader>pp", ":Telescope projects<CR>", { noremap = true, silent = true })
 			vim.keymap.set("n", "<leader>sh", builtin.help_tags, { desc = "[S]earch [H]elp" })
@@ -653,25 +692,6 @@ require("lazy").setup({
 			})
 		end,
 	},
-
-	{ -- You can easily change to a different colorscheme.
-		-- Change the name of the colorscheme plugin below, and then
-		-- change the command in the config to whatever the name of that colorscheme is.
-		--
-		-- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
-		"folke/tokyonight.nvim",
-		priority = 1000, -- Make sure to load this before all the other start plugins.
-		init = function()
-			-- Load the colorscheme here.
-			-- Like many other themes, this one has different styles, and you could load
-			-- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-			vim.cmd.colorscheme("tokyonight-night")
-
-			-- You can configure highlights by doing something like:
-			vim.cmd.hi("Comment gui=none")
-		end,
-	},
-
 	-- Highlight todo, notes, etc in comments
 	{
 		"folke/todo-comments.nvim",
@@ -804,6 +824,28 @@ require("lazy").setup({
 -- END of LAZY --
 --------------------------------
 ---
+---
+
+-- gestion du fond de couleur
+if vim.g.neovide then
+	-- Configuration spécifique pour Neovide
+else
+	-- Configuration pour le mode terminal
+	--
+	--
+	-- Assurer que Neovim utilise un mode de 256 couleurs
+	if vim.fn.has("termguicolors") == 1 then
+		vim.o.termguicolors = true -- Active les couleurs True Color si supporté
+	else
+		vim.o.t_Co = 256 -- Configure Neovim pour 256 couleurs
+	end
+	require("tokyonight").setup({
+		style = "night", -- Choisis ton style préféré : "storm", "night", ou "day"
+		terminal_colors = true, -- Utilise les couleurs du terminal en mode terminal
+	})
+end
+
+---
 -- Parse query outside of the function to avoid doing it for each call
 --
 --
@@ -860,3 +902,113 @@ require("lazy").setup({
 -- 		},
 -- 	},
 -- })
+
+--
+-- Ajout d'header pour les fichiers GO lors de la creation d'un fichier go
+--
+
+vim.api.nvim_create_autocmd("BufNewFile", {
+	pattern = "*.go",
+	callback = function()
+		local username = os.getenv("USERNAME")
+		local email = os.getenv("EMAIL")
+		local filename = vim.fn.expand("%:t")
+		local header = string.format(
+			[[
+/*
+ * File: %s
+ * Author: %s
+ * Email: %s
+ * Created: %s
+ * Last Modified: %s
+ * By: %s
+ */
+
+]],
+			filename,
+			username,
+			email,
+			os.date("%Y-%m-%d %H:%M"),
+			os.date("%Y-%m-%d %H:%M"),
+			username
+		)
+		vim.api.nvim_buf_set_lines(0, 0, 0, false, vim.split(header, "\n"))
+	end,
+})
+
+--
+-- Mise à jour du header lors de l'enregistrement
+--
+
+vim.api.nvim_create_autocmd("BufWritePre", {
+	pattern = "*.go",
+	callback = function()
+		local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+		for i, line in ipairs(lines) do
+			if line:match("Last Modified:") then
+				lines[i] = " * Last Modified: " .. os.date("%Y-%m-%d %H:%M")
+				vim.api.nvim_buf_set_lines(0, 0, -1, false, lines)
+			end
+			if line:match("By:") then
+				lines[i] = " * By: " .. os.getenv("USERNAME") .. "<" .. os.getenv("EMAIL") .. ">"
+				vim.api.nvim_buf_set_lines(0, 0, -1, false, lines)
+				break
+			end
+		end
+	end,
+})
+
+--
+-- Ajout d'header pour les fichiers markdown lors de la creation d'un fichier go
+--
+
+vim.api.nvim_create_autocmd("BufNewFile", {
+	pattern = "*.md",
+	callback = function()
+		local username = os.getenv("USERNAME")
+		local email = os.getenv("EMAIL")
+		local filename = vim.fn.expand("%:t")
+		local header = string.format(
+			[[
+---
+title: "%s"
+author: %s
+email: %s
+date: %s
+update: %s
+update-by: %s
+---
+
+]],
+			filename,
+			username,
+			email,
+			os.date("%Y-%m-%d %H:%M"),
+			os.date("%Y-%m-%d %H:%M"),
+			username
+		)
+		vim.api.nvim_buf_set_lines(0, 0, 0, false, vim.split(header, "\n"))
+	end,
+})
+
+--
+-- Mise à jour du header lors de l'enregistrement
+--
+
+vim.api.nvim_create_autocmd("BufWritePre", {
+	pattern = "*.md",
+	callback = function()
+		local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+		for i, line in ipairs(lines) do
+			if line:match("update:") then
+				lines[i] = "update: " .. os.date("%Y-%m-%d %H:%M")
+				vim.api.nvim_buf_set_lines(0, 0, -1, false, lines)
+			end
+			if line:match("update-by:") then
+				lines[i] = "update-by: " .. os.getenv("USERNAME") .. "<" .. os.getenv("EMAIL") .. ">"
+				vim.api.nvim_buf_set_lines(0, 0, -1, false, lines)
+				break
+			end
+		end
+	end,
+})
