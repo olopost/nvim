@@ -1,13 +1,15 @@
---[[
--- Samuel MEYNARD
--- Created on September 21th, 2024
---]]
---
-
--- Set space as leader key
+-- Set space as leader ke
 --
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
+
+-- gestion du mac
+--
+vim.g.neovide_input_use_logo = 1
+vim.api.nvim_set_keymap("", "<D-v>", "+p<CR>", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("!", "<D-v>", "<C-R>+", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("t", "<D-v>", "<C-R>+", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("v", "<D-v>", "<C-R>+", { noremap = true, silent = true })
 
 -- nerdfont installed
 vim.g.have_nerd_font = true
@@ -38,7 +40,6 @@ require("lazy").setup({
 	"ahmedkhalf/project.nvim", -- project management
 	"nvim-treesitter/playground", -- plugins de playground pour treesitter
 	"dhruvasagar/vim-table-mode", -- markdown table mode
-	"olopost/auto-header.nvim",
 	{
 		"olopost/render-markdown.nvim",
 		branch = "feat-mark",
@@ -144,25 +145,6 @@ require("lazy").setup({
 			--  - Insert mode: <c-/>
 			--  - Normal mode: ?
 			--
-			--
-			-- Auto Header
-			--
-			require("auto-header").setup({
-				create = true,
-				update = true,
-				languages = { "python", "go", "bash", "markdown" },
-				templates = {
-					{
-						language = "*",
-						template = {
-							"File: #file_relative_path",
-							"Author: #author_name",
-							"Last modifier: #date_now",
-							"Modified By: #author_name",
-						},
-					},
-				},
-			})
 			-- Treesitter
 			--
 			--
