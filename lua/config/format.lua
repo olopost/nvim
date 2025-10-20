@@ -16,12 +16,12 @@ require("conform").setup({
 		lua = { "stylua" }, -- needs stylua in $PATH
 		python = { "ruff_format", "ruff_fix" }, -- needs ruff in $PATH
 		nix = { "alejandra" },
-		markdown = { "mdformat" },
+		markdown = { "prettier" },
 		rust = { "rustfmt", lsp_format = "fallback" },
 		toml = { "taplo" },
 		tsx = { "biome-organize-imports", "biome" },
 		typescript = { "biome-organize-imports", "biome" },
-		typescriptreact = {"biome-organize-imports", "biome" },
+		typescriptreact = { "biome-organize-imports", "biome" },
 		yaml = { "yamlfmt" },
 		-- Use the "_" filetype to run formatters on filetypes that don't
 		-- have other formatters configured.

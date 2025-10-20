@@ -1,4 +1,3 @@
-
 -- lua/plugins.lua
 return {
 	-- Plugin Manager (lazy.nvim manages itself)
@@ -16,12 +15,13 @@ return {
 	-- AddHeader
 	{
 		"olopost/header.nvim",
-        branch = "add-markdown",
+		branch = "add-markdown",
 		lazy = false,
 		priority = 1000,
 		config = function()
-            require("header").setup({
-            author = "Samuel MEYNARD"})
+			require("header").setup({
+				author = "Samuel MEYNARD",
+			})
 		end,
 	},
 	-- Neogit
@@ -29,10 +29,8 @@ return {
 		"NeogitOrg/neogit",
 		lazy = false,
 		priority = 1000,
-		config = function()
-		end,
+		config = function() end,
 	},
-
 
 	-- File Explorer
 	{
@@ -41,29 +39,33 @@ return {
 		keys = {
 			{ "<C-a>", "<cmd>NvimTreeToggle<CR>", desc = "Toggle file tree" },
 			{ "§", "<cmd>NvimTreeToggle<CR>", desc = "Toggle file tree" },
-			{ "<leader>c", function()
-            require("nvim-tree.api").tree.change_root(vim.fn.expand('%:p:h'))
-        end, desc = "reroot current" },
+			{
+				"<leader>c",
+				function()
+					require("nvim-tree.api").tree.change_root(vim.fn.expand("%:p:h"))
+				end,
+				desc = "reroot current",
+			},
 			{ "<C-r>", "<cmd>NvimTreeRefresh<CR>", desc = "Refresh file tree" },
 		},
 		config = function()
 			require("nvim-tree").setup({
-                  -- Active la synchronisation entre le répertoire racine de nvim-tree et le cwd de Neovim
-  sync_root_with_cwd = true,
-  -- Met à jour le répertoire racine de nvim-tree lorsque le cwd de Neovim change
-  respect_buf_cwd = true,
-  -- Met à jour le cwd de Neovim lorsque tu changes de répertoire dans nvim-tree
-  update_cwd = true,
-  -- Autres options de configuration de nvim-tree
+				-- Active la synchronisation entre le répertoire racine de nvim-tree et le cwd de Neovim
+				sync_root_with_cwd = true,
+				-- Met à jour le répertoire racine de nvim-tree lorsque le cwd de Neovim change
+				respect_buf_cwd = true,
+				-- Met à jour le cwd de Neovim lorsque tu changes de répertoire dans nvim-tree
+				update_cwd = true,
+				-- Autres options de configuration de nvim-tree
 				hijack_netrw = true,
 				view = { width = 30 },
 				renderer = { icons = { show = { git = true, folder = true, file = true, folder_arrow = true } } },
-                actions = {
-    change_dir = {
-      enable = true,
-      global = false,
-    },
-  },
+				actions = {
+					change_dir = {
+						enable = true,
+						global = false,
+					},
+				},
 			})
 		end,
 		dependencies = { "nvim-tree/nvim-web-devicons" }, -- Icons for file tree
@@ -267,79 +269,77 @@ return {
 			})
 		end,
 	},
- -- Mason-lspconfig : bridge entre Mason et lspconfig
-  {
-    "williamboman/mason-lspconfig.nvim",
-    dependencies = { "williamboman/mason.nvim" },
-    config = function()
-      require("mason-lspconfig").setup({
-        ensure_installed = {
-          "lua_ls",       -- Lua
-          "gopls",          -- Go
-          "pyright",        -- Python
-          "rust_analyzer",  -- Rust
-          "tsserver",       -- TypeScript/JavaScript
-        },
-                automatic_installation = true,
-      })
-    end,
-  },
+	-- Mason-lspconfig : bridge entre Mason et lspconfig
+	{
+		"mason-org/mason-lspconfig.nvim",
+		opts = {
+			ensure_installed = {
+				"lua_ls", -- Lua
+				"gopls", -- Go
+				"pyright", -- Python
+				"tsserver", -- TypeScript/JavaScript
+			},
+		},
+		dependencies = {
+			{ "mason-org/mason.nvim", opts = {} },
+			"neovim/nvim-lspconfig",
+		},
+	},
 	-- LSP (Language Server Protocol) and related plugins
-    {
+	{
 		"neovim/nvim-lspconfig", -- Collection of configurations for built-in LSP client
 		event = { "BufReadPre", "BufNewFile" },
 		dependencies = {
-            "williamboman/mason.nvim",
-            "williamboman/mason-lspconfig.nvim",
+			"williamboman/mason.nvim",
+			"williamboman/mason-lspconfig.nvim",
 			-- LSP UI enhancements
 			{ "nvimdev/lspsaga.nvim", config = true }, -- LSP UIs (hover docs, code actions, rename, diagnostics, and floating terminal)
 			-- Automatically install LSP servers (optional, e.g., mason.nvim could be used here)
 		},
-    config = function()
-                 -- Configuration des diagnostics
-      vim.diagnostic.config({
-        virtual_text = false,
-        signs = true,
-        float = { border = "rounded" },
-      })
+		config = function()
+			-- Configuration des diagnostics
+			vim.diagnostic.config({
+				virtual_text = false,
+				signs = true,
+				float = { border = "rounded" },
+			})
 
-      -- Afficher les diagnostics au survol
-      vim.api.nvim_create_autocmd("CursorHold", {
-        callback = function()
-          vim.diagnostic.open_float(nil, { focusable = false })
-        end,
-      })
+			-- Afficher les diagnostics au survol
+			vim.api.nvim_create_autocmd("CursorHold", {
+				callback = function()
+					vim.diagnostic.open_float(nil, { focusable = false })
+				end,
+			})
 
-      -- Fonction `on_attach` commune à tous les LSP
-      local on_attach = function(client, bufnr)
-        local bufmap = function(mode, lhs, rhs, desc)
-          vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, silent = true, desc = desc })
-        end
+			-- Fonction `on_attach` commune à tous les LSP
+			local on_attach = function(client, bufnr)
+				local bufmap = function(mode, lhs, rhs, desc)
+					vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, silent = true, desc = desc })
+				end
 
-        -- Mappings LSP
-        bufmap("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>", "Go to definition")
-        bufmap("n", "gD", "<cmd>lua vim.lsp.buf.declaration()<CR>", "Go to declaration")
-        bufmap("n", "gr", "<cmd>lua vim.lsp.buf.references()<CR>", "Go to references")
-        bufmap("n", "gi", "<cmd>lua vim.lsp.buf.implementation()<CR>", "Go to implementation")
-        bufmap("n", "K", "<cmd>Lspsaga hover_doc<CR>", "Hover documentation")
-        bufmap("n", "<Leader>ca", "<cmd>Lspsaga code_action<CR>", "Code Action")
-        bufmap("n", "<Leader>rn", "<cmd>Lspsaga rename<CR>", "Rename symbol")
-        bufmap("n", "<Leader>f", "<cmd>lua vim.lsp.buf.format({ async = true })<CR>", "Format file")
-      end
+				-- Mappings LSP
+				bufmap("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>", "Go to definition")
+				bufmap("n", "gD", "<cmd>lua vim.lsp.buf.declaration()<CR>", "Go to declaration")
+				bufmap("n", "gr", "<cmd>lua vim.lsp.buf.references()<CR>", "Go to references")
+				bufmap("n", "gi", "<cmd>lua vim.lsp.buf.implementation()<CR>", "Go to implementation")
+				bufmap("n", "K", "<cmd>Lspsaga hover_doc<CR>", "Hover documentation")
+				bufmap("n", "<Leader>ca", "<cmd>Lspsaga code_action<CR>", "Code Action")
+				bufmap("n", "<Leader>rn", "<cmd>Lspsaga rename<CR>", "Rename symbol")
+				bufmap("n", "<Leader>f", "<cmd>lua vim.lsp.buf.format({ async = true })<CR>", "Format file")
+			end
 
-      -- Capacités étendues pour nvim-cmp
-      local capabilities = require("cmp_nvim_lsp").default_capabilities()
-    end,
-},
-     -- lspsaga.nvim : UI améliorées pour les LSP
-  {
-    "nvimdev/lspsaga.nvim",
-    dependencies = {
-      "nvim-treesitter/nvim-treesitter",
-      "nvim-tree/nvim-web-devicons",
-    },
-  },
-
+			-- Capacités étendues pour nvim-cmp
+			local capabilities = require("cmp_nvim_lsp").default_capabilities()
+		end,
+	},
+	-- lspsaga.nvim : UI améliorées pour les LSP
+	{
+		"nvimdev/lspsaga.nvim",
+		dependencies = {
+			"nvim-treesitter/nvim-treesitter",
+			"nvim-tree/nvim-web-devicons",
+		},
+	},
 
 	-- Autocompletion framework and snippet engine
 	{
@@ -402,7 +402,7 @@ return {
 				}),
 			})
 		end,
-},
+	},
 
 	-- AI Assistant (GitHub Copilot) - using Lua plugin for better integration
 	{
@@ -412,12 +412,12 @@ return {
 		config = function()
 			require("copilot").setup({
 				suggestion = { auto_trigger = true, keymap = { accept = "<Tab>" } },
-panel = { enabled = true},
-filetypes = {                -- activer Copilot pour ces fichiers
-        ["*"] = true,            -- tous les fichiers
-        markdown = false,        -- sauf si tu veux
-    },
-    copilot_node_command = "node",
+				panel = { enabled = true },
+				filetypes = { -- activer Copilot pour ces fichiers
+					["*"] = true, -- tous les fichiers
+					markdown = false, -- sauf si tu veux
+				},
+				copilot_node_command = "node",
 			})
 		end,
 	},
@@ -463,6 +463,7 @@ filetypes = {                -- activer Copilot pour ces fichiers
 					"markdown_inline",
 					"nginx",
 					"nix",
+					"rust",
 					"proto",
 					"python",
 					"rust",
