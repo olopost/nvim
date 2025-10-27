@@ -9,7 +9,17 @@ return {
 		lazy = false,
 		priority = 1000,
 		config = function()
-			vim.cmd([[colorscheme tokyonight]]) -- Set Tokyonight as the default colorscheme
+			require("tokyonight").setup({
+				style = "day", -- 🌞 Thème clair pour écran lumineux
+				transparent = false, -- Tu peux le passer à true si tu veux un fond transparent
+				styles = {
+					comments = { italic = false },
+					keywords = { italic = false },
+					functions = { bold = true },
+					variables = {},
+				},
+			})
+			vim.cmd([[colorscheme tokyonight-day]]) -- Set Tokyonight as the default colorscheme
 		end,
 	},
 	-- AddHeader
@@ -23,6 +33,21 @@ return {
 				author = "Samuel MEYNARD",
 			})
 		end,
+	},
+	-- Markdown view
+	{
+		"OXY2DEV/markview.nvim",
+		lazy = false,
+	},
+	-- inline image
+	{
+		"3rd/image.nvim",
+		build = false, -- so that it doesn't build the rock https://github.com/3rd/image.nvim/issues/91#issuecomment-2453430239
+		opts = {
+			processor = "magick_cli",
+			only_render_image_at_cursor = true, -- Rend toutes les images (pas seulement sous le curseur)
+			only_render_image_at_cursor_mode = "popup", -- Mode "popup" ou "inline"
+		},
 	},
 	-- Neogit
 	{
