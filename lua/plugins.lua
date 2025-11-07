@@ -57,6 +57,18 @@ return {
 		config = function() end,
 	},
 
+	{
+		"simrat39/symbols-outline.nvim",
+		lazy = true,
+		cmd = "SymbolsOutline",
+		config = true,
+		opts = {
+			show_guide = true,
+		},
+		keys = {
+			{ "<F3>", "<cmd>SymbolsOutline<CR>", desc = "Toggle Symbols" },
+		},
+	},
 	-- File Explorer
 	{
 		"kyazdani42/nvim-tree.lua", -- File tree sidebar (replaces netrw)
