@@ -62,7 +62,8 @@ return {
 		"kyazdani42/nvim-tree.lua", -- File tree sidebar (replaces netrw)
 		cmd = { "NvimTreeToggle", "NvimTreeRefresh" },
 		keys = {
-			{ "<C-a>", "<cmd>NvimTreeToggle<CR>", desc = "Toggle file tree" },
+			{ "<F2>", "<cmd>NvimTreeCwd<CR>", desc = "change_root" },
+			{ "<F5>", "<cmd>NvimTreeToggle<CR>", desc = "Toggle file tree" },
 			{ "§", "<cmd>NvimTreeToggle<CR>", desc = "Toggle file tree" },
 			{
 				"<leader>c",

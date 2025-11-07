@@ -14,7 +14,6 @@ require("config.options") -- vim options (replaces vim-sensible defaults)
 require("config.keymaps") -- global keymaps (replaces old mappings)
 require("config.autocmds") -- autocmds (replaces old autocommands)
 require("config.filetypes") -- filetype settings (replaces old filetype settings)
-
 -- Bootstrap lazy.nvim plugin manager if not already installed
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
@@ -36,3 +35,25 @@ require("lazy").setup(require("plugins"), {
 })
 
 require("config.format") -- auto-formatting with Conform.nvim
+
+-- Commande pour changer le cwd à partir du node sous le curseur dans nvim-tree
+vim.api.nvim_create_user_command("NvimTreeCwd", function()
+	local api = require("nvim-tree.api")
+	local node = api.tree.get_node_under_cursor()
+	if not node or not node.absolute_path then
+		vim.notify("Aucun répertoire sélectionné", vim.log.levels.WARN)
+		return
+	end
+
+	local path = node.absolute_path
+	local uv = vim.loop.fs_stat(path)
+	if uv and uv.type == "directory" then
+		-- Change le cwd global
+		vim.cmd("cd " .. path)
+		-- Change le root de nvim-tree
+		api.tree.change_root(path)
+		vim.notify("CWD changé vers : " .. path)
+	else
+		vim.notify("Ce n’est pas un répertoire", vim.log.levels.WARN)
+	end
+end, { desc = "Change CWD to directory under cursor in nvim-tree" })
